@@ -19,11 +19,12 @@ clc, clear
 max_distance= [40,50,60,70,80,90,100];
 ratio=[];
 for i =1:7
-ratio(i) = func_lodco(max_distance(i),0.002,0.6,500);
+ratio(i,:) = func_lodco(max_distance(i),0.002,0.6,500);
 end
 
 figure
-plot(max_distance, ratio);
+%plot(max_distance, mean(ratio,2));
+plot(max_distance,ratio(:,200));
 hold on
 title('load')
 xlabel('time slot')
@@ -38,6 +39,38 @@ ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex'
 % 随着γ的增加，属于[0,1]，卸载任务的平均比例随着减速率逐渐增加，最终收敛到特定值（即97.5731%）。 
 % 原因是基于 LODCO 的贪心策略遗传算法是基于 γ-贪婪策略的，即更大的 γ 将带来更大的选择卸载模式的概率。 
 % Fig. 8. Average ratio of offloading tasks vs. phi  and rho, respectively
+
+
+
+phi= [0.001,0.002,0.003,0.004,0.005,0.006,0.007];
+ratio=[];
+for i =1:7
+ratio(i,:) = func_lodco(50,phi(i),0.6,500);
+end
+
+figure
+%plot(max_distance, mean(ratio,2));
+plot(phi,ratio(:,200));
+hold on
+title('load')
+xlabel('time slot')
+ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex')
+
+
+rho= [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+ratio=[];
+for i =1:10
+ratio(i,:) = func_lodco(50,0.002,rho(i),500);
+end
+
+figure
+%plot(max_distance, mean(ratio,2));
+plot(rho,ratio(:,200));
+hold on
+title('load')
+xlabel('time slot')
+ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex')
+
 
 
 %输入：最远距离 rho，任务丢弃的惩罚项权重 phi，计算任务抵达的概率 rho，运行的时间片长度T
@@ -467,6 +500,11 @@ request_num = 0;
 i = 1;          % we simply choose the first mobile device
 for t = 1: T
     if final_chosen_cost(t, i) == 0
+        if request_num < 0.9
+            average_ratio(t, :) = [0, 0, 0];
+        else
+            average_ratio(t, :) = [mobile_exe, server_exe, drop] / request_num;
+        end
         continue
     else
         request_num = request_num + 1;
@@ -480,18 +518,19 @@ for t = 1: T
     end
     average_ratio(t, :) = [mobile_exe, server_exe, drop] / request_num;
 end
-figure
-plot(1:T, average_ratio(:, 1));
-hold on
-plot(1:T, average_ratio(:, 2));
-hold on
-plot(1:T, average_ratio(:, 3));
-legend('mobile execution', 'MEC server execution', 'drop')
-title('Envolution of average ratio of chosen modes')
-xlabel('time slot')
-ylabel('average  ratio of chosen modes $\frac{1}{T} \sum_{t=0}^{T-1} \{I_m^t, I_s^t, I_d^t\}$ of the i-th mobile device', 'Interpreter','latex')
+% figure
+% plot(1:T, average_ratio(:, 1));
+% hold on
+% plot(1:T, average_ratio(:, 2));
+% hold on
+% plot(1:T, average_ratio(:, 3));
+% legend('mobile execution', 'MEC server execution', 'drop')
+% title('Envolution of average ratio of chosen modes')
+% xlabel('time slot')
+% ylabel('average  ratio of chosen modes $\frac{1}{T} \sum_{t=0}^{T-1} \{I_m^t, I_s^t, I_d^t\}$ of the i-th mobile device', 'Interpreter','latex')
 
-ratio =  mean(average_ratio(:,2));
+%ratio =  mean(average_ratio(:,2));
+ratio =  average_ratio(:,2);
 end
 
 

@@ -499,6 +499,11 @@ request_num = 0;
 i = 1;          % we simply choose the first mobile device
 for t = 1: T
     if final_chosen_cost(t, i) == 0
+        if request_num < 0.9
+            average_ratio(t, :) = [0, 0, 0];
+        else
+            average_ratio(t, :) = [mobile_exe, server_exe, drop] / request_num;
+        end
         continue
     else
         request_num = request_num + 1;
@@ -531,6 +536,12 @@ ylabel('average  ratio of chosen modes $\frac{1}{T} \sum_{t=0}^{T-1} \{I_m^t, I_
 
 
 % Fig. 6. Average ratio of offloading tasks by different algorithms.
+% 在图 6 中，在第二个优化目标（最大卸载计算任务的数量）上，
+% 比较了基于 LODCO 的贪心策略遗传算法与基准算法（基于 LODCO 的贪心算法）的性能。
+% 可以看到，基于 LODCO 的贪心策略遗传算法得到的卸载任务的平均比率（95.0698%）大于基于 LODCO 的贪心算法得到的卸载任务比率（92.8549%5），
+% 而 这两个比率都大于 LODCO 算法得到的卸载任务的平均比率（即 84.4401%）。
+% 结果证明，我们的算法可以获得比基准算法更好的小区容量。 
+
 disp('--------------迭代结束--------------');
 disp(['本地执行的平均移动设备占比: ', num2str(mean(mode_num(:,1)))]);
 disp(['卸载执行的平均移动设备占比: ', num2str(mean(mode_num(:,2)))]);
