@@ -421,10 +421,10 @@ while t <= T
         drop_rate = size(find(indicator(t,:)==3),2)/task_num;
     end
     mode_num(t,:) = [local_rate,offloading_rate,drop_rate];
-    disp(['at',num2str(t),'time slot:']);
-    disp(['local ',num2str(local_rate)]);
-    disp(['server: ',num2str(offloading_rate)]);
-    disp(['drop: ',num2str(drop_rate)]);
+%     disp(['at',num2str(t),'time slot:']);
+%     disp(['local ',num2str(local_rate)]);
+%     disp(['server: ',num2str(offloading_rate)]);
+%     disp(['drop: ',num2str(drop_rate)]);
       
       
       
@@ -438,17 +438,17 @@ end
 
 %% step 4: evaluate the simulation results
 %% 评估仿真结果
-% 1. the battery energy level vs. time slot
+% Fig. 2. Battery energy level of each mobile device vs. time.
 %  N台移动端的电量与时间的关系
 figure
 plot(1:T, B(1:T, :))
 hold on
 plot(1:T, repmat(theta + E_H_max, [T, 1]), '-')
-title('Envolution of battery energy level')
+title('Fig. 2. Battery energy level of each mobile device vs. time.')
 xlabel('time slot')
 ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex')
 
-% 2. the average execution cost vs. time slot
+% Fig. 3. Average QoE-Cost of all mobile device vs. time
 %  N个移动设备最后选择的模式下的execution cost的平均情况
 accumulated = 0;
 average_cost = zeros(T, N);
@@ -464,85 +464,34 @@ for i = 1: N
         end
         average_cost(t, i) = accumulated / request_num;
     end
-    plot(1:T, average_cost(:, i));
+    %plot(1:T, average_cost(:, i));
+    
     hold on
 end
-title('Envolution of average execution cost')
+plot(1:T, mean(average_cost(:, i),2));
+
+title('Fig. 3. Average QoE-Cost of all mobile device vs. time')
 xlabel('time slot')
 ylabel('average execution cost $\frac{1}{T} \sum_{t=0}^{T-1} cost^t$ of each mobile device', 'Interpreter','latex')
 
-% 3. the average ratio of each chosen mode of the ith mobile device vs. time slot
-% 移动端选择的三种模式的比例
-average_ratio = zeros(T, 3);
-mobile_exe = 0; server_exe = 0; drop = 0;
-request_num = 0;
-i = 1;          % we simply choose the first mobile device
-for t = 1: T
-    if final_chosen_cost(t, i) == 0
-        continue
-    else
-        request_num = request_num + 1;
-        if chosen_mode(t, i) == 1
-            mobile_exe = mobile_exe + 1;
-        elseif chosen_mode(t, i) == 2
-            server_exe = server_exe + 1;
-        else
-            drop = drop + 1;
-        end
-    end
-    average_ratio(t, :) = [mobile_exe, server_exe, drop] / request_num;
-end
+
+
+% Fig. 4. Average energy level of each mobile device.
 figure
-plot(1:T, average_ratio(:, 1));
-hold on
-plot(1:T, average_ratio(:, 2));
-hold on
-plot(1:T, average_ratio(:, 3));
-legend('mobile execution', 'MEC server execution', 'drop')
-title('Envolution of average ratio of chosen modes')
-xlabel('time slot')
-ylabel('average  ratio of chosen modes $\frac{1}{T} \sum_{t=0}^{T-1} \{I_m^t, I_s^t, I_d^t\}$ of the i-th mobile device', 'Interpreter','latex')
-
-
-
-%% 图三：x是时间，y是所有设备的平均成本
-%  N个移动设备最后选择的模式下的execution cost的平均情况
-accumulated = 0;
-average_cost = zeros(T, N);
-figure
-for i = 1: N
-    % draw for each mobile device
-    request_num = 0;
-    for t = 1: T
-        accumulated = accumulated + final_chosen_cost(t, i);
-        if chosen_mode(t, i) ~= 4
-            % there exists task request
-            request_num = request_num + 1;
-        end
-        average_cost(t, i) = accumulated / request_num;
-    end
-    plot(1:T, average_cost(:, i));
-    hold on
+all_ave = []
+for i =1:N
+    all_ave(i) = mean( B(:,i));
 end
-title('average_cost')
-xlabel('time')
-ylabel(' average final chosen cost$\frac{1}{T} \sum_{t=0}^{T-1} cost^t$', 'Interpreter','latex')
-
-%图四：x是每个设备的编号        y是对应的能量
-figure
-plot(1:10, B(T, :))
-for i =1:10:200
+bar(1:N, all_ave)
 hold on
-plot(1:10, B(i, :))
-end
-hold on
-plot(1:10, repmat(theta + E_H_max, [10, 1]), '-') %  实际能耗上限
-title('mobile   battery energy ')
+%plot(1:N, repmat(theta + E_H_max, [N, 1]), '-') %  实际能耗上限
+title('Average energy level of each mobile device. ')
 xlabel('mobile N=10')
 ylabel('battery energy level', 'Interpreter','latex')
 
 
-% 图五：x是时间 y是选择不同执行模式的比率
+
+%Fig. 5. The ratio of each chosen modes vs. time.
 % 移动端选择的三种模式的比例
 average_ratio = zeros(T, 3);
 mobile_exe = 0; server_exe = 0; drop = 0;
@@ -570,40 +519,28 @@ plot(1:T, average_ratio(:, 2));
 hold on
 plot(1:T, average_ratio(:, 3));
 legend('mobile execution', 'MEC server execution', 'drop')
-title('Envolution of average ratio of chosen modes')
+title('Fig. 5. The ratio of each chosen modes vs. time.')
 xlabel('time slot')
 ylabel('average  ratio of chosen modes $\frac{1}{T} \sum_{t=0}^{T-1} \{I_m^t, I_s^t, I_d^t\}$ of the i-th mobile device', 'Interpreter','latex')
 
 
 
-% 图6，x是时间 y是平均卸载任务的比率
+
+
+
+
+
+% Fig. 6. Average ratio of offloading tasks by different algorithms.
 disp('--------------迭代结束--------------');
 disp(['本地执行的平均移动设备占比: ', num2str(mean(mode_num(:,1)))]);
 disp(['卸载执行的平均移动设备占比: ', num2str(mean(mode_num(:,2)))]);
 disp(['任务丢弃的平均移动设备占比: ', num2str(mean(mode_num(:,3)))]);
 
 figure
-plot(1:T, mode_num(1:T, 2))
+plot(1:T, average_ratio(:, 2));
 hold on
 title('load')
 xlabel('time slot')
 ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex')
-
-
-% 图7，x是距离  y是平均卸载任务比率
-
-mean(mode_num(:,2))
-
-figure
-plot(1:T, mode_num(1:T, 2))
-hold on
-title('load')
-xlabel('time slot')
-ylabel('battery energy level $B_t$ of each mobile device', 'Interpreter','latex')
-
-
-% 图8 改变任务大小，比较卸载率
-
-
 
 
