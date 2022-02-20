@@ -1,4 +1,4 @@
-% the Lyapunov Optimization-based Dynamic Computation Offloading (LODCO) algorithm.
+ the Lyapunov Optimization-based Dynamic Computation Offloading (LODCO) algorithm.
 
 clc, clear
 opt = optimset('Display', 'none');
